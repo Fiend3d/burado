@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Burado Thumbnail</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"> 
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/awesomplete.css" rel="stylesheet">
+  </head>
+  <body style="padding-top: 30px;">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <h1><b>Burado Thumbnail Maker</b></h1>
+        </div>
+        <div class="col-sm">
+          <ol>
+            <li>Take screenshots and paste them here</li>
+            <li>Adjust</li>
+            <li>...</li>
+            <li>Profit</li>
+          </ol>
+        </div>
+      </div>
+      <canvas id="thumbnail" width="1280" height="720"></canvas>
+      <div class="card text-dark bg-light mb-3">
+        <div class="card-header">Abyss Label</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm">
+              <label for="abyss_label_first" class="form-label">First line</label>
+              <input id="abyss_label_first" class="form-control" type="text" value="Abyss">
+            </div>
+            <div class="col-sm">
+              <label for="abyss_label_second" class="form-label">Second line</label>
+              <input id="abyss_label_second" class="form-control" type="text" value="X.X">
+            </div>
+            <div class="col-sm">
+              <label for="abyss_label_distance" class="form-label">Distance:</label>
+              <output for="abyss_label_distance" id="abyss_label_distance_value"></output>
+              <input type="range" class="form-range" id="abyss_label_distance" min="0" max="100" step="1" value="60">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card text-dark bg-light mb-3">
+        <div class="card-header">Background</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm">
+              <b>Left</b>
+              <div id="paste_area_left">
+                <p>Click here and paste an image (Ctrl+V)</p>
+                <p>Or select an image file: <input type="file" id="file_input_left" accept="image/*"></p>
+              </div>
+            </div>
+            <div class="col-sm">
+              <b>Right</b>
+              <div id="paste_area_right">
+                <p>Click here and paste an image (Ctrl+V)</p>
+                <p>Or select an image file: <input type="file" id="file_input_right" accept="image/*"></p>
+              </div>
+            </div>
+            <div class="col-sm">
+              <label for="background_left_shift" class="form-label">Left Shift:</label>
+              <output for="background_left_shift" id="background_left_shift_value"></output>
+              <input type="range" class="form-range" id="background_left_shift" min="-100" max="100" step="1" value="0">
+
+              <label for="background_right_shift" class="form-label">Right Shift:</label>
+              <output for="background_right_shift" id="background_right_shift_value"></output>
+              <input type="range" class="form-range" id="background_right_shift" min="-100" max="100" step="1" value="0">
+
+              <label for="background_blend" class="form-label">Blend:</label>
+              <output for="background_blend" id="background_blend_value"></output>
+              <input type="range" class="form-range" id="background_blend" min="0" max="400" step="1" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card text-dark bg-light mb-3">
+        <div class="card-header">Characters</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm">
+              <input id="first_team1" placeholder="First Team 1">
+              <input id="first_team2" placeholder="First Team 2">
+              <input id="first_team3" placeholder="First Team 3">
+            </div>
+            <div class="col-sm">
+              <input id="second_team1" placeholder="Second Team 1">
+              <input id="second_team2" placeholder="Second Team 2">
+              <input id="second_team3" placeholder="Second Team 3">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card text-dark bg-light mb-3">
+        <div class="card-header">Extra</div>
+        <div class="card-body">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="four_star">
+            <label class="form-check-label" for="four_star">
+              4* Only
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="question">
+            <label class="form-check-label" for="question">
+              Question
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="epic_fail">
+            <label class="form-check-label" for="epic_fail">
+              Epic Fail
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="static/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/awesomplete.min.js"></script>
+
+    <script type="module" src="static/js/script.js"></script>
+  </body>
+</html>

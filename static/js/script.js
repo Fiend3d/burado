@@ -23,24 +23,25 @@ const ctx = canvas.getContext("2d");
 
 async function load_assets() {
   try {
-    const abyss_12 = await load_image("static/abyss.png");
-    const four_star = await load_image("static/4star.png");
-    const question = await load_image("static/question.png");
-    const epic_fail = await load_image("static/epic_fail.png");
-    const chars = await load_json("static/chars.json");
-    return { abyss_12, four_star, question, epic_fail, chars };
+    const result = {};
+    result.abyss_12 = await load_image("static/abyss.png");
+    result.four_star = await load_image("static/4star.png");
+    result.question = await load_image("static/question.png");
+    result.epic_fail = await load_image("static/epic_fail.png");
+    result.chars = await load_json("static/chars.json");
+    return result;
   } catch (error) {
     console.error("Failed to load assets:", error);
     throw error;
   }
 }
 
-const { abyss_12, four_star, question, epic_fail, chars } = await load_assets();
+const assets = await load_assets();
 
 const chars_map = new Map();
 
-for (const item of chars.chars) {
-  chars_map.set(item.toLowerCase(), chars.directory + "/" + item + ".png");
+for (const item of assets.chars.chars) {
+  chars_map.set(item.toLowerCase(), `${assets.chars.directory}/${item}.png`);
 }
 
 const abyss_label_first = document.getElementById("abyss_label_first");
@@ -204,7 +205,7 @@ function draw_thumbnail() {
     }
   }
 
-  ctx.drawImage(abyss_12, 0, 0);
+  ctx.drawImage(assets.abyss_12, 0, 0);
 
   ctx.font = "bold 100px Arial";
 
@@ -254,13 +255,13 @@ function draw_thumbnail() {
 
   // extra 
   if (four_star_checkbox.checked) {
-    ctx.drawImage(four_star, 0, 0);
+    ctx.drawImage(assets.four_star, 0, 0);
   }
   if (question_checkbox.checked) {
-    ctx.drawImage(question, 0, 0);
+    ctx.drawImage(assets.question, 0, 0);
   }
   if (epic_fail_checkbox.checked) {
-    ctx.drawImage(epic_fail, 0, 0);
+    ctx.drawImage(assets.epic_fail, 0, 0);
   }
 }
 
@@ -318,7 +319,7 @@ character_inputs.right3 = document.getElementById('second_team3');
 for (const key in character_inputs) {
   new Awesomplete(character_inputs[key], {
     autoFirst: true,
-    list: chars.chars
+    list: assets.chars.chars
   });
 }
 

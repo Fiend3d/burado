@@ -37,15 +37,11 @@ async function load_assets() {
 
 const { abyss_12, four_star, question, epic_fail, chars } = await load_assets();
 
-// console.log(chars);
-
 const chars_map = new Map();
 
 for (const item of chars.chars) {
   chars_map.set(item.toLowerCase(), chars.directory + "/" + item + ".png");
 }
-
-// console.log(chars_map);
 
 const abyss_label_first = document.getElementById("abyss_label_first");
 const abyss_label_second = document.getElementById("abyss_label_second");
@@ -73,13 +69,7 @@ background_blend_value.textContent = background_blend.value;
 let background_left;
 let background_right;
 
-let left_char1;
-let left_char2;
-let left_char3;
-
-let right_char1;
-let right_char2;
-let right_char3;
+const characters = {};
 
 paste_area_left.addEventListener('paste', (event) => {
   background_left = handle_paste(event);
@@ -238,28 +228,28 @@ function draw_thumbnail() {
   ctx.fillText(fist_line, 640, 360 - text_distance);
   ctx.fillText(second_line, 640, 360 + text_distance);
 
-  if (left_char1) {
-    ctx.drawImage(left_char1, 0, 0, left_char1.width, left_char1.height, 0, 50, 200, 200);
+  if (characters.left1) {
+    ctx.drawImage(characters.left1, 0, 0, characters.left1.width, characters.left1.height, 0, 50, 200, 200);
   }
 
-  if (left_char2) {
-    ctx.drawImage(left_char2, 0, 0, left_char2.width, left_char2.height, 0, 260, 200, 200);
+  if (characters.left2) {
+    ctx.drawImage(characters.left2, 0, 0, characters.left2.width, characters.left2.height, 0, 260, 200, 200);
   }
 
-  if (left_char3) {
-    ctx.drawImage(left_char3, 0, 0, left_char3.width, left_char3.height, 0, 470, 200, 200);
+  if (characters.left3) {
+    ctx.drawImage(characters.left3, 0, 0, characters.left3.width, characters.left3.height, 0, 470, 200, 200);
   }
 
-  if (right_char1) {
-    ctx.drawImage(right_char1, 0, 0, right_char1.width, right_char1.height, 1080, 50, 200, 200);
+  if (characters.right1) {
+    ctx.drawImage(characters.right1, 0, 0, characters.right1.width, characters.right1.height, 1080, 50, 200, 200);
   }
 
-  if (right_char2) {
-    ctx.drawImage(right_char2, 0, 0, right_char2.width, right_char2.height, 1080, 260, 200, 200);
+  if (characters.right2) {
+    ctx.drawImage(characters.right2, 0, 0, characters.right2.width, characters.right2.height, 1080, 260, 200, 200);
   }
 
-  if (right_char3) {
-    ctx.drawImage(right_char3, 0, 0, right_char3.width, right_char3.height, 1080, 470, 200, 200);
+  if (characters.right3) {
+    ctx.drawImage(characters.right3, 0, 0, characters.right3.width, characters.right3.height, 1080, 470, 200, 200);
   }
 
   // extra 
@@ -315,15 +305,15 @@ epic_fail_checkbox.addEventListener("input", (event) => {
 
 draw_thumbnail();
 
-const first_team1 = document.getElementById('first_team1')
-const first_team2 = document.getElementById('first_team2')
-const first_team3 = document.getElementById('first_team3')
+const character_inputs = {};
 
-const second_team1 = document.getElementById('second_team1')
-const second_team2 = document.getElementById('second_team2')
-const second_team3 = document.getElementById('second_team3')
+character_inputs.left1 = document.getElementById('first_team1');
+character_inputs.left2 = document.getElementById('first_team2');
+character_inputs.left3 = document.getElementById('first_team3');
 
-// I hate this T_T
+character_inputs.right1 = document.getElementById('second_team1');
+character_inputs.right2 = document.getElementById('second_team2');
+character_inputs.right3 = document.getElementById('second_team3');
 
 function auto_cfg() {
   return {
@@ -332,153 +322,40 @@ function auto_cfg() {
   };
 }
 
-new Awesomplete(first_team1, auto_cfg());
-new Awesomplete(first_team2, auto_cfg());
-new Awesomplete(first_team3, auto_cfg());
-new Awesomplete(second_team1, auto_cfg());
-new Awesomplete(second_team2, auto_cfg());
-new Awesomplete(second_team3, auto_cfg());
+new Awesomplete(character_inputs.left1, auto_cfg());
+new Awesomplete(character_inputs.left2, auto_cfg());
+new Awesomplete(character_inputs.left3, auto_cfg());
+new Awesomplete(character_inputs.right1, auto_cfg());
+new Awesomplete(character_inputs.right2, auto_cfg());
+new Awesomplete(character_inputs.right3, auto_cfg());
 
-// 1 char
-
-function handle_char1(event) {
-  const actual_value = first_team1.value.toLowerCase();
+function handle_char(name) {
+  const actual_value = character_inputs[name].value.toLowerCase();
   if (chars_map.has(actual_value)) {
-    left_char1 = new Image;
-    left_char1.onload = function () {
+    characters[name] = new Image;
+    characters[name].onload = function () {
       draw_thumbnail();
     };
-    left_char1.src = chars_map.get(actual_value);
+    characters[name].src = chars_map.get(actual_value);
   } else {
-    left_char1 = undefined;
+    characters[name] = undefined;
     draw_thumbnail();
   }
 }
 
-first_team1.addEventListener("input", (event) => {
-  handle_char1();
-});
-
-first_team1.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char1();
-});
-
-// 2 char
-
-function handle_char2(event) {
-  const actual_value = first_team2.value.toLowerCase();
-  if (chars_map.has(actual_value)) {
-    left_char2 = new Image;
-    left_char2.onload = function () {
-      draw_thumbnail();
-    };
-    left_char2.src = chars_map.get(actual_value);
-  } else {
-    left_char2 = undefined;
-    draw_thumbnail();
-  }
+function setup_input(name) {
+  character_inputs[name].addEventListener("input", (event) => {
+    handle_char(name);
+  });
+  
+  character_inputs[name].addEventListener('awesomplete-selectcomplete', event => {
+    handle_char(name);
+  });
 }
 
-first_team2.addEventListener("input", (event) => {
-  handle_char2();
-});
-
-first_team2.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char2();
-});
-
-// 3 char
-
-function handle_char3(event) {
-  const actual_value = first_team3.value.toLowerCase();
-  if (chars_map.has(actual_value)) {
-    left_char3 = new Image;
-    left_char3.onload = function () {
-      draw_thumbnail();
-    };
-    left_char3.src = chars_map.get(actual_value);
-  } else {
-    left_char3 = undefined;
-    draw_thumbnail();
-  }
-}
-
-first_team3.addEventListener("input", (event) => {
-  handle_char3();
-});
-
-first_team3.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char3();
-});
-
-// 4 char
-
-function handle_char4(event) {
-  const actual_value = second_team1.value.toLowerCase();
-  if (chars_map.has(actual_value)) {
-    right_char1 = new Image;
-    right_char1.onload = function () {
-      draw_thumbnail();
-    };
-    right_char1.src = chars_map.get(actual_value);
-  } else {
-    right_char1 = undefined;
-    draw_thumbnail();
-  }
-}
-
-second_team1.addEventListener("input", (event) => {
-  handle_char4();
-});
-
-second_team1.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char4();
-});
-
-// 5 char
-
-function handle_char5(event) {
-  const actual_value = second_team2.value.toLowerCase();
-  if (chars_map.has(actual_value)) {
-    right_char2 = new Image;
-    right_char2.onload = function () {
-      draw_thumbnail();
-    };
-    right_char2.src = chars_map.get(actual_value);
-  } else {
-    right_char2 = undefined;
-    draw_thumbnail();
-  }
-}
-
-second_team2.addEventListener("input", (event) => {
-  handle_char5();
-});
-
-second_team2.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char5();
-});
-
-// 6 char
-
-function handle_char6(event) {
-  const actual_value = second_team3.value.toLowerCase();
-  if (chars_map.has(actual_value)) {
-    right_char3 = new Image;
-    right_char3.onload = function () {
-      draw_thumbnail();
-    };
-    right_char3.src = chars_map.get(actual_value);
-  } else {
-    right_char3 = undefined;
-    draw_thumbnail();
-  }
-}
-
-second_team3.addEventListener("input", (event) => {
-  handle_char6();
-});
-
-second_team3.addEventListener('awesomplete-selectcomplete', event => {
-  handle_char6();
-});
+setup_input("left1");
+setup_input("left2");
+setup_input("left3");
+setup_input("right1");
+setup_input("right2");
+setup_input("right3");

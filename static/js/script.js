@@ -1,15 +1,15 @@
 function load_image(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-        img.src = src;
-    });
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    img.src = src;
+  });
 }
 
 async function load_json(url) {
   try {
-    const res  = await fetch(url);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     return data;
@@ -23,15 +23,15 @@ const ctx = canvas.getContext("2d");
 
 async function load_assets() {
   try {
-      const abyss_12 = await load_image("static/abyss.png");
-      const four_star = await load_image("static/4star.png");
-      const question = await load_image("static/question.png");
-      const epic_fail = await load_image("static/epic_fail.png");
-      const chars = await load_json("static/chars.json");
-      return { abyss_12, four_star, question, epic_fail, chars }; 
+    const abyss_12 = await load_image("static/abyss.png");
+    const four_star = await load_image("static/4star.png");
+    const question = await load_image("static/question.png");
+    const epic_fail = await load_image("static/epic_fail.png");
+    const chars = await load_json("static/chars.json");
+    return { abyss_12, four_star, question, epic_fail, chars };
   } catch (error) {
-      console.error("Failed to load assets:", error);
-      throw error;
+    console.error("Failed to load assets:", error);
+    throw error;
   }
 }
 
@@ -82,72 +82,72 @@ let right_char2;
 let right_char3;
 
 paste_area_left.addEventListener('paste', (event) => {
-    background_left = handle_paste(event);
+  background_left = handle_paste(event);
 });
-file_input_left.addEventListener('change',  (event) => {
-    background_left = handle_file_select(event);
+file_input_left.addEventListener('change', (event) => {
+  background_left = handle_file_select(event);
 });
 
 paste_area_right.addEventListener('paste', (event) => {
-    background_right = handle_paste(event);
+  background_right = handle_paste(event);
 });
-file_input_right.addEventListener('change',  (event) => {
-    background_right = handle_file_select(event);
+file_input_right.addEventListener('change', (event) => {
+  background_right = handle_file_select(event);
 });
 
 function handle_paste(event) {
-    // Get clipboard data
-    const clipboardData = event.clipboardData || window.clipboardData;
-    
-    if (!clipboardData) {
-        alert('Clipboard API not supported in this browser');
-        return;
-    }
+  // Get clipboard data
+  const clipboardData = event.clipboardData || window.clipboardData;
 
-    // Check if there are image items in clipboard
-    if (clipboardData.items) {
-        for (let i = 0; i < clipboardData.items.length; i++) {
-            if (clipboardData.items[i].type.indexOf('image') !== -1) {
-                const blob = clipboardData.items[i].getAsFile();
-                let result = process_image_blob(blob);
-                event.preventDefault();
-                return result;
-            }
-        }
+  if (!clipboardData) {
+    alert('Clipboard API not supported in this browser');
+    return;
+  }
+
+  // Check if there are image items in clipboard
+  if (clipboardData.items) {
+    for (let i = 0; i < clipboardData.items.length; i++) {
+      if (clipboardData.items[i].type.indexOf('image') !== -1) {
+        const blob = clipboardData.items[i].getAsFile();
+        let result = process_image_blob(blob);
+        event.preventDefault();
+        return result;
+      }
     }
-    
-    alert('No image found in clipboard');
+  }
+
+  alert('No image found in clipboard');
 }
 
 function handle_file_select(event) {
-    const file = event.target.files[0];
-    if (file && file.type.indexOf('image') !== -1) {
-        return process_image_blob(file);
-    } else {
-        alert('Please select a valid image file');
-    }
+  const file = event.target.files[0];
+  if (file && file.type.indexOf('image') !== -1) {
+    return process_image_blob(file);
+  } else {
+    alert('Please select a valid image file');
+  }
 }
 
 function process_image_blob(blob) {
-    // Create URL from blob
-    const imageUrl = URL.createObjectURL(blob);
-    
-    const image = new Image();
+  // Create URL from blob
+  const imageUrl = URL.createObjectURL(blob);
 
-    image.onload = function() {
-        // Clean up
-        URL.revokeObjectURL(imageUrl);
-        draw_thumbnail();
-    };
-    
-    image.onerror = function() {
-        alert('Error loading image');
-        URL.revokeObjectURL(imageUrl);
-    };
-    
-    image.src = imageUrl;
+  const image = new Image();
 
-    return image;
+  image.onload = function () {
+    // Clean up
+    URL.revokeObjectURL(imageUrl);
+    draw_thumbnail();
+  };
+
+  image.onerror = function () {
+    alert('Error loading image');
+    URL.revokeObjectURL(imageUrl);
+  };
+
+  image.src = imageUrl;
+
+  return image;
 }
 
 const four_star_checkbox = document.querySelector('#four_star');
@@ -155,123 +155,123 @@ const question_checkbox = document.querySelector('#question');
 const epic_fail_checkbox = document.querySelector('#epic_fail');
 
 function draw_thumbnail() {
-    // console.log("draw_thumbnail");
+  // console.log("draw_thumbnail");
 
-    ctx.fillStyle = "#888888"; 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#888888";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const px = 633;
-    const py = 98;
-    const shift_left = parseInt(background_left_shift.value, 10);
-    const shift_right = parseInt(background_right_shift.value, 10);
-    const blend = parseInt(background_blend_value.value, 10);
+  const px = 633;
+  const py = 98;
+  const shift_left = -parseInt(background_left_shift.value, 10);
+  const shift_right = -parseInt(background_right_shift.value, 10);
+  const blend = parseInt(background_blend_value.value, 10);
 
-    const mid = 640;
-    // const w = 1280;
-    const h = 720;
+  const mid = 640;
+  // const w = 1280;
+  const h = 720;
 
-    if (background_left && background_right && blend > 0) {
-        ctx.drawImage(background_left,
-            px + shift_left, py, mid + blend, h,
-            0, 0, mid + blend, h);
+  if (background_left && background_right && blend > 0) {
+    ctx.drawImage(background_left,
+      px + shift_left, py, mid + blend, h,
+      0, 0, mid + blend, h);
 
-        const off  = document.createElement('canvas');
-        off.width  = blend * 2;
-        off.height = h;
-        const octx = off.getContext('2d');
+    const off = document.createElement('canvas');
+    off.width = blend * 2;
+    off.height = h;
+    const octx = off.getContext('2d');
 
-        octx.drawImage(background_right,
-                px + shift_right - blend, py, blend * 2, h,
-                0, 0, blend * 2, h);
+    octx.drawImage(background_right,
+      px + shift_right - blend, py, blend * 2, h,
+      0, 0, blend * 2, h);
 
-        const grad = octx.createLinearGradient(0, 0, blend * 2, 0);
-        grad.addColorStop(0, 'rgba(0,0,0,0)');
-        grad.addColorStop(1, 'rgba(0,0,0,1)');
+    const grad = octx.createLinearGradient(0, 0, blend * 2, 0);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,1)');
 
-        octx.globalCompositeOperation = 'destination-in';
-        octx.fillStyle = grad;
-        octx.fillRect(0, 0, blend * 2, h);
+    octx.globalCompositeOperation = 'destination-in';
+    octx.fillStyle = grad;
+    octx.fillRect(0, 0, blend * 2, h);
 
-        ctx.drawImage(off, mid - blend, 0);
+    ctx.drawImage(off, mid - blend, 0);
 
-        if (background_right) {
-          ctx.drawImage(background_right, 
-              px + shift_right + blend, py, mid - blend, h, 
-              mid + blend, 0, mid - blend, h);
-      }
-
-      } else {
-        if (background_left) {
-            ctx.drawImage(background_left, 
-                px + shift_left, py, mid, h, 
-                0, 0, mid, h);
-        }
-
-        if (background_right) {
-            ctx.drawImage(background_right, 
-                px + shift_right, py, mid, h, 
-                mid, 0, mid, h);
-        }
+    if (background_right) {
+      ctx.drawImage(background_right,
+        px + shift_right + blend, py, mid - blend, h,
+        mid + blend, 0, mid - blend, h);
     }
 
-    ctx.drawImage(abyss_12, 0, 0);
-
-    ctx.font = "bold 100px Arial";
-
-    // Set outline style
-    ctx.strokeStyle = "#431700";
-    ctx.lineWidth = 25;
-    ctx.lineJoin = "round";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const fist_line = abyss_label_first.value;
-    const second_line = abyss_label_second.value;
-
-    const text_distance = parseInt(abyss_label_distance.value, 10);
-
-    ctx.strokeText(fist_line, 640, 360 - text_distance);
-    ctx.strokeText(second_line, 640, 360 + text_distance);
-
-    ctx.fillStyle = "#ffe74e";
-
-    ctx.fillText(fist_line, 640, 360 - text_distance);
-    ctx.fillText(second_line, 640, 360 + text_distance);
-
-    if (left_char1) {
-      ctx.drawImage(left_char1, 0, 0, left_char1.width, left_char1.height, 0, 50, 200, 200);
+  } else {
+    if (background_left) {
+      ctx.drawImage(background_left,
+        px + shift_left, py, mid, h,
+        0, 0, mid, h);
     }
 
-    if (left_char2) {
-      ctx.drawImage(left_char2, 0, 0, left_char2.width, left_char2.height, 0, 260, 200, 200);
+    if (background_right) {
+      ctx.drawImage(background_right,
+        px + shift_right, py, mid, h,
+        mid, 0, mid, h);
     }
+  }
 
-    if (left_char3) {
-      ctx.drawImage(left_char3, 0, 0, left_char3.width, left_char3.height, 0, 470, 200, 200);
-    }
+  ctx.drawImage(abyss_12, 0, 0);
 
-    if (right_char1) {
-      ctx.drawImage(right_char1, 0, 0, right_char1.width, right_char1.height, 1080, 50, 200, 200);
-    }
+  ctx.font = "bold 100px Arial";
 
-    if (right_char2) {
-      ctx.drawImage(right_char2, 0, 0, right_char2.width, right_char2.height, 1080, 260, 200, 200);
-    }
+  // Set outline style
+  ctx.strokeStyle = "#431700";
+  ctx.lineWidth = 25;
+  ctx.lineJoin = "round";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
 
-    if (right_char3) {
-      ctx.drawImage(right_char3, 0, 0, right_char3.width, right_char3.height, 1080, 470, 200, 200);
-    }
+  const fist_line = abyss_label_first.value;
+  const second_line = abyss_label_second.value;
 
-    // extra 
-    if (four_star_checkbox.checked) {
-      ctx.drawImage(four_star, 0, 0);
-    }
-    if (question_checkbox.checked) {
-      ctx.drawImage(question, 0, 0);
-    }
-    if (epic_fail_checkbox.checked) {
-      ctx.drawImage(epic_fail, 0, 0);
-    }
+  const text_distance = parseInt(abyss_label_distance.value, 10);
+
+  ctx.strokeText(fist_line, 640, 360 - text_distance);
+  ctx.strokeText(second_line, 640, 360 + text_distance);
+
+  ctx.fillStyle = "#ffe74e";
+
+  ctx.fillText(fist_line, 640, 360 - text_distance);
+  ctx.fillText(second_line, 640, 360 + text_distance);
+
+  if (left_char1) {
+    ctx.drawImage(left_char1, 0, 0, left_char1.width, left_char1.height, 0, 50, 200, 200);
+  }
+
+  if (left_char2) {
+    ctx.drawImage(left_char2, 0, 0, left_char2.width, left_char2.height, 0, 260, 200, 200);
+  }
+
+  if (left_char3) {
+    ctx.drawImage(left_char3, 0, 0, left_char3.width, left_char3.height, 0, 470, 200, 200);
+  }
+
+  if (right_char1) {
+    ctx.drawImage(right_char1, 0, 0, right_char1.width, right_char1.height, 1080, 50, 200, 200);
+  }
+
+  if (right_char2) {
+    ctx.drawImage(right_char2, 0, 0, right_char2.width, right_char2.height, 1080, 260, 200, 200);
+  }
+
+  if (right_char3) {
+    ctx.drawImage(right_char3, 0, 0, right_char3.width, right_char3.height, 1080, 470, 200, 200);
+  }
+
+  // extra 
+  if (four_star_checkbox.checked) {
+    ctx.drawImage(four_star, 0, 0);
+  }
+  if (question_checkbox.checked) {
+    ctx.drawImage(question, 0, 0);
+  }
+  if (epic_fail_checkbox.checked) {
+    ctx.drawImage(epic_fail, 0, 0);
+  }
 }
 
 abyss_label_first.addEventListener("input", (event) => {
@@ -332,9 +332,9 @@ function auto_cfg() {
   };
 }
 
-new Awesomplete(first_team1,  auto_cfg());
-new Awesomplete(first_team2,  auto_cfg());
-new Awesomplete(first_team3,  auto_cfg());
+new Awesomplete(first_team1, auto_cfg());
+new Awesomplete(first_team2, auto_cfg());
+new Awesomplete(first_team3, auto_cfg());
 new Awesomplete(second_team1, auto_cfg());
 new Awesomplete(second_team2, auto_cfg());
 new Awesomplete(second_team3, auto_cfg());

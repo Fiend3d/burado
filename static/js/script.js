@@ -315,19 +315,12 @@ character_inputs.right1 = document.getElementById('second_team1');
 character_inputs.right2 = document.getElementById('second_team2');
 character_inputs.right3 = document.getElementById('second_team3');
 
-function auto_cfg() {
-  return {
+for (const key in character_inputs) {
+  new Awesomplete(character_inputs[key], {
     autoFirst: true,
     list: chars.chars
-  };
+  });
 }
-
-new Awesomplete(character_inputs.left1, auto_cfg());
-new Awesomplete(character_inputs.left2, auto_cfg());
-new Awesomplete(character_inputs.left3, auto_cfg());
-new Awesomplete(character_inputs.right1, auto_cfg());
-new Awesomplete(character_inputs.right2, auto_cfg());
-new Awesomplete(character_inputs.right3, auto_cfg());
 
 function handle_char(name) {
   const actual_value = character_inputs[name].value.toLowerCase();

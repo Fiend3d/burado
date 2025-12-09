@@ -46,6 +46,8 @@ for (const item of assets.chars.chars) {
 
 const abyss_label_first = document.getElementById("abyss_label_first");
 const abyss_label_second = document.getElementById("abyss_label_second");
+const abyss_label_left = document.getElementById("abyss_label_left");
+const abyss_label_right = document.getElementById("abyss_label_right");
 const abyss_label_distance = document.getElementById("abyss_label_distance");
 const abyss_label_distance_value = document.getElementById("abyss_label_distance_value");
 abyss_label_distance_value.textContent = abyss_label_distance.value;
@@ -218,9 +220,12 @@ function draw_thumbnail() {
 
   const fist_line = abyss_label_first.value;
   const second_line = abyss_label_second.value;
+  const left_line = abyss_label_left.value;
+  const right_line = abyss_label_right.value;
 
   const text_distance = parseInt(abyss_label_distance.value, 10);
 
+  // Center title text
   ctx.strokeText(fist_line, 640, 360 - text_distance);
   ctx.strokeText(second_line, 640, 360 + text_distance);
 
@@ -228,6 +233,29 @@ function draw_thumbnail() {
 
   ctx.fillText(fist_line, 640, 360 - text_distance);
   ctx.fillText(second_line, 640, 360 + text_distance);
+
+  //left & right bottom text
+  if (left_line || right_line) {
+    // same style as above (font, stroke, fill already set)
+
+    const canvasCenterX = canvas.width / 2;         // 640 for 1280 width
+    const leftX = canvasCenterX / 2;               // 320  -> center of left half
+    const rightX = canvasCenterX + leftX;          // 960  -> center of right half
+
+    // place text a bit above the bottom so it doesn't get cut off
+    const bottomY = canvas.height - 80;            // e.g. 720 - 80 = 640
+
+    if (left_line) {
+      ctx.strokeText(left_line, leftX, bottomY);
+      ctx.fillText(left_line, leftX, bottomY);
+    }
+
+    if (right_line) {
+      ctx.strokeText(right_line, rightX, bottomY);
+      ctx.fillText(right_line, rightX, bottomY);
+    }
+  }
+  //end new section
 
   if (characters.left1) {
     ctx.drawImage(characters.left1, 0, 0, characters.left1.width, characters.left1.height, 0, 50, 200, 200);
@@ -270,6 +298,14 @@ abyss_label_first.addEventListener("input", (event) => {
 });
 
 abyss_label_second.addEventListener("input", (event) => {
+  draw_thumbnail();
+});
+
+abyss_label_left.addEventListener("input", (event) => {
+  draw_thumbnail();
+});
+
+abyss_label_right.addEventListener("input", (event) => {
   draw_thumbnail();
 });
 

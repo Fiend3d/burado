@@ -1,0 +1,22 @@
+#paste_area_left,
+#paste_area_right {
+  border: 2px dashed #adb5bd;
+  border-radius: .375rem;
+  padding: .75rem;
+  cursor: pointer;
+}
+
+#paste_area_left p:last-child,
+#paste_area_right p:last-child {
+  margin-bottom: 0;
+}
+
+/* The paste event only reaches these divs while they hold focus, so make it obvious
+   which side a Ctrl+V will land in. */
+#paste_area_left:focus,
+#paste_area_right:focus {
+  outline: none;
+  border-color: #0d6efd;
+  border-style: solid;
+  box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25);
+}

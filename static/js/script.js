@@ -73,17 +73,21 @@ let background_right;
 const characters = {};
 
 paste_area_left.addEventListener('paste', (event) => {
-  background_left = handle_paste(event);
+  const image = handle_paste(event);
+  if (image) background_left = image;
 });
 file_input_left.addEventListener('change', (event) => {
-  background_left = handle_file_select(event);
+  const image = handle_file_select(event);
+  if (image) background_left = image;
 });
 
 paste_area_right.addEventListener('paste', (event) => {
-  background_right = handle_paste(event);
+  const image = handle_paste(event);
+  if (image) background_right = image;
 });
 file_input_right.addEventListener('change', (event) => {
-  background_right = handle_file_select(event);
+  const image = handle_file_select(event);
+  if (image) background_right = image;
 });
 
 function handle_paste(event) {
@@ -141,6 +145,36 @@ function process_image_blob(blob) {
   return image;
 }
 
+// The background crop was tuned against a 1920x1080 screenshot. Everything is stored
+// relative to that reference frame and scaled by the actual source height, so a screenshot
+// of any resolution frames the same subject. X is an offset from the image's horizontal
+// centre, which keeps ultrawide and 16:10 shots lined up too.
+const REF_W = 1920;
+const REF_H = 1080;
+const CROP_X_FROM_CENTER = 633 - REF_W / 2;
+const CROP_Y = 98;
+
+const mid = 640;
+const h = 720;
+
+function is_ready(img) {
+  return img && img.complete && img.naturalHeight > 0;
+}
+
+// Source-space origin corresponding to this side's destination origin on the canvas.
+function background_source(img, shift) {
+  const s = img.naturalHeight / REF_H;
+  return { s, x: img.naturalWidth / 2 + (CROP_X_FROM_CENTER + shift) * s, y: CROP_Y * s };
+}
+
+// Maps a destination rect on the 1280x720 canvas back onto the source screenshot.
+function draw_bg_slice(target, img, shift, side_origin, dest_x, dest_w, out_x, out_y) {
+  const src = background_source(img, shift);
+  target.drawImage(img,
+    src.x + (dest_x - side_origin) * src.s, src.y, dest_w * src.s, h * src.s,
+    out_x, out_y, dest_w, h);
+}
+
 const four_star_checkbox = document.querySelector('#four_star');
 const question_checkbox = document.querySelector('#question');
 const epic_fail_checkbox = document.querySelector('#epic_fail');
@@ -151,29 +185,19 @@ function draw_thumbnail() {
   ctx.fillStyle = "#888888";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const px = 633;
-  const py = 98;
   const shift_left = -parseInt(background_left_shift.value, 10);
   const shift_right = -parseInt(background_right_shift.value, 10);
-  const blend = parseInt(background_blend_value.value, 10);
+  const blend = parseInt(background_blend.value, 10);
 
-  const mid = 640;
-  // const w = 1280;
-  const h = 720;
-
-  if (background_left && background_right && blend > 0) {
-    ctx.drawImage(background_left,
-      px + shift_left, py, mid + blend, h,
-      0, 0, mid + blend, h);
+  if (is_ready(background_left) && is_ready(background_right) && blend > 0) {
+    draw_bg_slice(ctx, background_left, shift_left, 0, 0, mid + blend, 0, 0);
 
     const off = document.createElement('canvas');
     off.width = blend * 2;
     off.height = h;
     const octx = off.getContext('2d');
 
-    octx.drawImage(background_right,
-      px + shift_right - blend, py, blend * 2, h,
-      0, 0, blend * 2, h);
+    draw_bg_slice(octx, background_right, shift_right, mid, mid - blend, blend * 2, 0, 0);
 
     const grad = octx.createLinearGradient(0, 0, blend * 2, 0);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -185,23 +209,14 @@ function draw_thumbnail() {
 
     ctx.drawImage(off, mid - blend, 0);
 
-    if (background_right) {
-      ctx.drawImage(background_right,
-        px + shift_right + blend, py, mid - blend, h,
-        mid + blend, 0, mid - blend, h);
-    }
-
+    draw_bg_slice(ctx, background_right, shift_right, mid, mid + blend, mid - blend, mid + blend, 0);
   } else {
-    if (background_left) {
-      ctx.drawImage(background_left,
-        px + shift_left, py, mid, h,
-        0, 0, mid, h);
+    if (is_ready(background_left)) {
+      draw_bg_slice(ctx, background_left, shift_left, 0, 0, mid, 0, 0);
     }
 
-    if (background_right) {
-      ctx.drawImage(background_right,
-        px + shift_right, py, mid, h,
-        mid, 0, mid, h);
+    if (is_ready(background_right)) {
+      draw_bg_slice(ctx, background_right, shift_right, mid, mid, mid, mid, 0);
     }
   }
 

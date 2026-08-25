@@ -18,7 +18,8 @@ def save_file_list_to_json(directory_path, output_file):
         print(f"Error: '{directory_path}' is not a directory")
         return
     
-    files = [remove_all_extensions(f.name) for f in directory.iterdir() if f.is_file()]
+    files = [remove_all_extensions(f.name) for f in directory.iterdir()
+             if f.is_file() and f.suffix.lower() == ".png"]
     files.sort()
     
     file_list = {

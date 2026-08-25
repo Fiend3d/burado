@@ -8,4 +8,10 @@ I built this to create thumbnails for my [YouTube channel](https://www.youtube.c
 
 ## How to add a character
 
-To add a character, place the PNG file in the `static/chars` directory and run the `make_chars.py` script. This will update the `chars.json` file.
+Place the PNG file in the `static/chars` directory and push. The [workflow](.github/workflows/pages.yml) regenerates `static/chars.json` from whatever is in that directory and redeploys the site, so the character appears in the autocomplete on its own — there is nothing to run by hand.
+
+`make_chars.py` still does the same job locally. Run it from inside `static/` if you want `chars.json` up to date before pushing, e.g. to try the new character on a local `python -m http.server`.
+
+## Deployment
+
+The same workflow publishes the site, so **Settings → Pages → Source** has to stay on "GitHub Actions" rather than "Deploy from a branch".

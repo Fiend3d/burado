@@ -1,0 +1,53 @@
+name: Build and deploy to Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit the regenerated chars.json back to master
+  pages: write      # publish
+  id-token: write   # OIDC, required by deploy-pages
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      # make_chars.py uses the relative paths ./chars and chars.json,
+      # so it has to run from inside static/.
+      - name: Regenerate chars.json from static/chars/*.png
+        working-directory: static
+        run: python make_chars.py
+
+      - name: Commit the list if it changed
+        run: |
+          if git diff --quiet -- static/chars.json; then
+            echo "chars.json already matches static/chars/ - nothing to commit"
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add static/chars.json
+            git commit -m "chore: regenerate chars.json"
+            git push
+          fi
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v5

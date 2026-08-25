@@ -11,132 +11,102 @@
   <link href="static/css/style.css" rel="stylesheet">
 </head>
 
-<body style="padding-top: 30px;">
-  <div class="container">
-    <div class="row">
-      <div class="col-sm">
-        <h1><b>Burado Thumbnail Maker</b></h1>
-        <a href="https://github.com/Fiend3d/burado"><img src="static/github.png" class="p-2">https://github.com/Fiend3d/burado</a>
+<body>
+  <div class="container-xxl py-2">
+
+    <header class="d-flex align-items-center gap-2 mb-2">
+      <h1 class="h5 mb-0 fw-bold">Burado Thumbnail Maker</h1>
+      <a href="https://github.com/Fiend3d/burado" class="link-secondary d-inline-flex" title="Fiend3d/burado">
+        <img src="static/github.png" width="20" height="20" alt="GitHub">
+      </a>
+      <span class="small text-muted d-none d-md-inline">Paste screenshots &rarr; adjust &rarr; profit</span>
+      <div class="btn-group btn-group-sm ms-auto" role="group" aria-label="Mode">
+        <input type="radio" class="btn-check" name="mode" id="mode_abyss" value="abyss" autocomplete="off" checked>
+        <label class="btn btn-outline-primary" for="mode_abyss">Abyss</label>
+        <input type="radio" class="btn-check" name="mode" id="mode_stygian" value="stygian" autocomplete="off">
+        <label class="btn btn-outline-primary" for="mode_stygian">Stygian</label>
       </div>
-      <div class="col-sm">
-        <ol>
-          <li>Take screenshots and paste them here</li>
-          <li>Adjust</li>
-          <li>...</li>
-          <li>Profit</li>
-        </ol>
-      </div>
-    </div>
-    <canvas id="thumbnail" width="1280" height="720" style="width: 100%"></canvas>
-    <div class="card text-dark bg-light mb-3">
-      <div class="card-header">Abyss Label</div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-sm">
-            <label for="abyss_label_first" class="form-label">First line</label>
-            <input id="abyss_label_first" class="form-control" type="text" value="Abyss">
-          </div>
-          <div class="col-sm">
-            <label for="abyss_label_second" class="form-label">Second line</label>
-            <input id="abyss_label_second" class="form-control" type="text" value="X.X">
-          </div>
-          <div class="col-sm">
-            <label for="abyss_label_distance" class="form-label">Distance:</label>
-            <output for="abyss_label_distance" id="abyss_label_distance_value"></output>
-            <input type="range" class="form-range" id="abyss_label_distance" min="0" max="100" step="1" value="60">
-          </div>
+    </header>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="canvas-holder sticky-lg-top">
+          <canvas id="thumbnail" width="1280" height="720" class="w-100 rounded border"></canvas>
         </div>
       </div>
-    </div>
-    <div class="card text-dark bg-light mb-3">
-      <div class="card-header">Background</div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-sm">
-            <b>Left</b>
-            <div id="paste_area_left" tabindex="0">
-              <p>Click here and paste an image (Ctrl+V)</p>
-              <p>Or select an image file: <input type="file" id="file_input_left" accept="image/*"></p>
+
+      <div class="col-lg-5">
+
+        <div class="card mb-2">
+          <div class="card-header py-1 px-2 small fw-semibold">Label</div>
+          <div class="card-body p-2">
+            <div class="row g-2">
+              <div class="col-6">
+                <label for="abyss_label_first" class="form-label small mb-1">First line</label>
+                <input id="abyss_label_first" class="form-control form-control-sm" type="text" value="Abyss">
+              </div>
+              <div class="col-6">
+                <label for="abyss_label_second" class="form-label small mb-1">Second line</label>
+                <input id="abyss_label_second" class="form-control form-control-sm" type="text" value="X.X">
+              </div>
+              <div class="col-12">
+                <div class="d-flex justify-content-between">
+                  <label for="abyss_label_distance" class="form-label small mb-1">Distance</label>
+                  <output for="abyss_label_distance" id="abyss_label_distance_value" class="small text-muted"></output>
+                </div>
+                <input type="range" class="form-range" id="abyss_label_distance" min="0" max="100" step="1" value="60">
+              </div>
+              <div class="col-12" data-mode="stygian">
+                <div class="d-flex justify-content-between">
+                  <label for="label_shift" class="form-label small mb-1">Shift</label>
+                  <output for="label_shift" id="label_shift_value" class="small text-muted"></output>
+                </div>
+                <input type="range" class="form-range" id="label_shift" min="-250" max="250" step="1" value="0">
+              </div>
             </div>
           </div>
-          <div class="col-sm">
-            <b>Right</b>
-            <div id="paste_area_right" tabindex="0">
-              <p>Click here and paste an image (Ctrl+V)</p>
-              <p>Or select an image file: <input type="file" id="file_input_right" accept="image/*"></p>
+        </div>
+
+        <div class="card mb-2">
+          <div class="card-header py-1 px-2 small fw-semibold">Background</div>
+          <div class="card-body p-2">
+            <div id="background_panels"></div>
+            <div id="background_shifts" class="mt-2"></div>
+            <div class="d-flex justify-content-between">
+              <label for="background_blend" class="form-label small mb-1">Blend</label>
+              <output for="background_blend" id="background_blend_value" class="small text-muted"></output>
             </div>
-          </div>
-          <div class="col-sm">
-            <label for="background_left_shift" class="form-label">Left Shift:</label>
-            <output for="background_left_shift" id="background_left_shift_value"></output>
-            <input type="range" class="form-range" id="background_left_shift" min="-100" max="100" step="1" value="0">
-
-            <label for="background_right_shift" class="form-label">Right Shift:</label>
-            <output for="background_right_shift" id="background_right_shift_value"></output>
-            <input type="range" class="form-range" id="background_right_shift" min="-100" max="100" step="1" value="0">
-
-            <label for="background_blend" class="form-label">Blend:</label>
-            <output for="background_blend" id="background_blend_value"></output>
             <input type="range" class="form-range" id="background_blend" min="0" max="400" step="1" value="0">
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="card text-dark bg-light mb-3">
-      <div class="card-header">Characters</div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-sm">
-            <div class="row mb-2">
-              <input id="first_team1" style="width: 100%" class="form-control" placeholder="First Team 1">
-            </div>
-            <div class="row mb-2">
-              <input id="first_team2" style="width: 100%" class="form-control" placeholder="First Team 2">
-            </div>
-            <div class="row mb-2">
-              <input id="first_team3" style="width: 100%" class="form-control" placeholder="First Team 3">
-            </div>
-          </div>
-          <div class="col-sm">
-            <div class="row mb-2">
-              <input id="second_team1" style="width: 100%" class="form-control" placeholder="Second Team 1">
-            </div>
-            <div class="row mb-2">
-              <input id="second_team2" style="width: 100%" class="form-control" placeholder="Second Team 2">
-            </div>
-            <div class="row">
-              <input id="second_team3" style="width: 100%" class="form-control" placeholder="Second Team 3">
+        <div class="card mb-2">
+          <div class="card-header py-1 px-2 small fw-semibold">Characters</div>
+          <div class="card-body p-2" id="character_slots"></div>
+        </div>
+
+        <div class="card mb-2" data-mode="abyss">
+          <div class="card-header py-1 px-2 small fw-semibold">Extra</div>
+          <div class="card-body p-2">
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="four_star">
+                <label class="form-check-label small" for="four_star">4* Only</label>
+              </div>
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="question">
+                <label class="form-check-label small" for="question">Question</label>
+              </div>
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="epic_fail">
+                <label class="form-check-label small" for="epic_fail">Epic Fail</label>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
-
-    <div class="card text-dark bg-light mb-3">
-      <div class="card-header">Extra</div>
-      <div class="card-body">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="" id="four_star">
-          <label class="form-check-label" for="four_star">
-            4* Only
-          </label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="" id="question">
-          <label class="form-check-label" for="question">
-            Question
-          </label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="" id="epic_fail">
-          <label class="form-check-label" for="epic_fail">
-            Epic Fail
-          </label>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script src="static/js/bootstrap.bundle.min.js"></script>

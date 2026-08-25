@@ -1,22 +1,47 @@
-#paste_area_left,
-#paste_area_right {
-  border: 2px dashed #adb5bd;
-  border-radius: .375rem;
-  padding: .75rem;
-  cursor: pointer;
+/* Keeps a transparent-edged thumbnail readable against the page. */
+.canvas-holder {
+  top: .5rem;
+  z-index: 1;
 }
 
-#paste_area_left p:last-child,
-#paste_area_right p:last-child {
-  margin-bottom: 0;
+#thumbnail {
+  background: #e9ecef;
+  display: block;
+}
+
+.paste-area {
+  border: 2px dashed #adb5bd;
+  border-radius: .375rem;
+  padding: .4rem .5rem;
+  font-size: .8125rem;
+  line-height: 1.25;
+  cursor: pointer;
 }
 
 /* The paste event only reaches these divs while they hold focus, so make it obvious
    which side a Ctrl+V will land in. */
-#paste_area_left:focus,
-#paste_area_right:focus {
+.paste-area:focus {
   outline: none;
   border-color: #0d6efd;
   border-style: solid;
   box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25);
+}
+
+/* Awesomplete wraps each input in an inline-block div, which would otherwise collapse
+   the generated character inputs to their intrinsic width inside a grid column. */
+.awesomplete {
+  display: block;
+  width: 100%;
+}
+
+.awesomplete > ul {
+  font-size: .8125rem;
+}
+
+.awesomplete > ul > li {
+  padding: .2rem .4rem;
+}
+
+.form-range {
+  height: 1.1rem;
 }

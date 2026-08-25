@@ -44,51 +44,203 @@ for (const item of assets.chars.chars) {
   chars_map.set(item.toLowerCase(), `${assets.chars.directory}/${item}.png`);
 }
 
+// Abyss stacks one team down each edge; Stygian lines three teams up along the bottom.
+const ABYSS_SIZE = 200;
+const ABYSS_YS = [50, 260, 470];
+
+const STYGIAN_SIZE = 128;
+const STYGIAN_Y = 576;
+const STYGIAN_MARGIN = 16;
+const STYGIAN_TEAM_GAP = 48;
+
+function abyss_team(prefix, title, x) {
+  return {
+    title,
+    slots: ABYSS_YS.map((y, i) => ({
+      key: `${prefix}${i + 1}`,
+      placeholder: `${title} ${i + 1}`,
+      x, y, size: ABYSS_SIZE,
+    })),
+  };
+}
+
+// 2 margins + 3 teams * 3 icons * 128 + 2 gaps * 48 == 1280 exactly.
+function stygian_team(team) {
+  const origin = STYGIAN_MARGIN + team * (3 * STYGIAN_SIZE + STYGIAN_TEAM_GAP);
+  const title = `Team ${team + 1}`;
+  return {
+    title,
+    slots: [0, 1, 2].map((i) => ({
+      key: `sty${team + 1}_${i + 1}`,
+      placeholder: `${title} ${i + 1}`,
+      x: origin + i * STYGIAN_SIZE,
+      y: STYGIAN_Y,
+      size: STYGIAN_SIZE,
+    })),
+  };
+}
+
+// A mode is just a layout table: which banner to blit, whether the extra overlays
+// apply, how many screenshots share the canvas, and where each character slot lands
+// on the 1280x720 canvas.
+const MODES = {
+  abyss: {
+    name: "Abyss",
+    overlay: "abyss_12",
+    extras: true,
+    backgrounds: [
+      { key: "bg_left", title: "Left" },
+      { key: "bg_right", title: "Right" },
+    ],
+    blend_max: 400,
+    // The caption is pinned to the banner art, so there is nothing to slide it against.
+    label_shift: false,
+    groups: [
+      abyss_team("left", "First Team", 0),
+      abyss_team("right", "Second Team", 1280 - ABYSS_SIZE),
+    ],
+  },
+  stygian: {
+    name: "Stygian",
+    overlay: null,
+    extras: false,
+    backgrounds: [
+      { key: "bg_sty1", title: "Team 1" },
+      { key: "bg_sty2", title: "Team 2" },
+      { key: "bg_sty3", title: "Team 3" },
+    ],
+    // Three panels are ~427px wide, so a 400px blend radius would run straight
+    // through the neighbouring seam.
+    blend_max: 200,
+    // No banner here, so the caption is free to move between the top edge and the
+    // row of characters.
+    label_shift: true,
+    groups: [stygian_team(0), stygian_team(1), stygian_team(2)],
+  },
+};
+
+function mode_slots(name) {
+  return MODES[name].groups.flatMap((group) => group.slots);
+}
+
+let mode = "abyss";
+
 const abyss_label_first = document.getElementById("abyss_label_first");
 const abyss_label_second = document.getElementById("abyss_label_second");
 const abyss_label_distance = document.getElementById("abyss_label_distance");
 const abyss_label_distance_value = document.getElementById("abyss_label_distance_value");
 abyss_label_distance_value.textContent = abyss_label_distance.value;
 
-const paste_area_left = document.getElementById('paste_area_left');
-const file_input_left = document.getElementById('file_input_left');
-const paste_area_right = document.getElementById('paste_area_right');
-const file_input_right = document.getElementById('file_input_right');
+const label_shift = document.getElementById("label_shift");
+const label_shift_value = document.getElementById("label_shift_value");
+label_shift_value.textContent = label_shift.value;
 
-const background_left_shift = document.getElementById("background_left_shift");
-const background_left_shift_value = document.getElementById("background_left_shift_value");
-background_left_shift_value.textContent = background_left_shift.value;
+// Each mode remembers its own caption, so switching back and forth is lossless.
+const label_state = {
+  abyss: { first: "Abyss", second: "X.X", distance: "60", shift: "0" },
+  stygian: { first: "Stygian", second: "X.X", distance: "60", shift: "0" },
+};
 
-const background_right_shift = document.getElementById("background_right_shift");
-const background_right_shift_value = document.getElementById("background_right_shift_value");
-background_right_shift_value.textContent = background_right_shift.value;
+const background_panels = document.getElementById("background_panels");
+const background_shifts = document.getElementById("background_shifts");
 
 const background_blend = document.getElementById("background_blend");
 const background_blend_value = document.getElementById("background_blend_value");
 background_blend_value.textContent = background_blend.value;
 
-let background_left;
-let background_right;
+// Both keyed by background panel key, so each mode keeps its own screenshots and
+// framing across a mode switch.
+const backgrounds = {};
+const shift_inputs = {};
 
 const characters = {};
 
-paste_area_left.addEventListener('paste', (event) => {
-  const image = handle_paste(event);
-  if (image) background_left = image;
-});
-file_input_left.addEventListener('change', (event) => {
-  const image = handle_file_select(event);
-  if (image) background_left = image;
-});
+function build_background_inputs(name) {
+  const tiles = document.createElement("div");
+  tiles.className = "row g-2";
+  tiles.dataset.mode = name;
 
-paste_area_right.addEventListener('paste', (event) => {
-  const image = handle_paste(event);
-  if (image) background_right = image;
-});
-file_input_right.addEventListener('change', (event) => {
-  const image = handle_file_select(event);
-  if (image) background_right = image;
-});
+  const shifts = document.createElement("div");
+  shifts.dataset.mode = name;
+
+  for (const panel of MODES[name].backgrounds) {
+    const column = document.createElement("div");
+    column.className = "col";
+
+    // The paste event only reaches this div while it holds focus, hence tabindex.
+    const area = document.createElement("div");
+    area.className = "paste-area";
+    area.tabIndex = 0;
+
+    const title = document.createElement("div");
+    title.className = "fw-semibold";
+    title.textContent = panel.title;
+
+    const hint = document.createElement("div");
+    hint.className = "text-muted";
+    hint.textContent = "Ctrl+V";
+
+    // A native file input is far too wide for a third of this column, so the
+    // picker hides behind its own label.
+    const browse = document.createElement("label");
+    browse.className = "link-primary text-decoration-underline";
+    browse.textContent = "browse";
+
+    const file = document.createElement("input");
+    file.type = "file";
+    file.accept = "image/*";
+    file.hidden = true;
+    browse.append(file);
+
+    area.append(title, hint, browse);
+    column.append(area);
+    tiles.append(column);
+
+    area.addEventListener("paste", (event) => {
+      const image = handle_paste(event);
+      if (image) backgrounds[panel.key] = image;
+    });
+    file.addEventListener("change", (event) => {
+      const image = handle_file_select(event);
+      if (image) backgrounds[panel.key] = image;
+    });
+
+    const range = document.createElement("input");
+    range.type = "range";
+    range.className = "form-range";
+    range.id = `shift_${panel.key}`;
+    range.min = -100;
+    range.max = 100;
+    range.step = 1;
+    range.value = 0;
+
+    const head = document.createElement("div");
+    head.className = "d-flex justify-content-between";
+
+    const label = document.createElement("label");
+    label.className = "form-label small mb-1";
+    label.htmlFor = range.id;
+    label.textContent = `${panel.title} shift`;
+
+    const value = document.createElement("output");
+    value.className = "small text-muted";
+    value.setAttribute("for", range.id);
+    value.textContent = range.value;
+
+    head.append(label, value);
+
+    range.addEventListener("input", () => {
+      value.textContent = range.value;
+      draw_thumbnail();
+    });
+
+    shifts.append(head, range);
+    shift_inputs[panel.key] = range;
+  }
+
+  background_panels.append(tiles);
+  background_shifts.append(shifts);
+}
 
 function handle_paste(event) {
   // Get clipboard data
@@ -153,12 +305,22 @@ const REF_W = 1920;
 const REF_H = 1080;
 const CROP_X_FROM_CENTER = 633 - REF_W / 2;
 const CROP_Y = 98;
+// ...and it was tuned while filling a 640px-wide half of the canvas. A mode with more
+// panels gives each screenshot a narrower band, so the crop has to be re-centred on the
+// same point rather than just showing the left slice of the old window.
+const CROP_REF_BAND = 640;
 
-const mid = 640;
+const w = 1280;
 const h = 720;
 
 function is_ready(img) {
   return img && img.complete && img.naturalHeight > 0;
+}
+
+// Panels split the canvas into equal vertical bands; rounding keeps the seams on
+// whole pixels. Two panels give the original 0 / 640 / 1280 split.
+function panel_edges(count) {
+  return Array.from({ length: count + 1 }, (_, i) => Math.round((w * i) / count));
 }
 
 // Source-space origin corresponding to this side's destination origin on the canvas.
@@ -175,29 +337,47 @@ function draw_bg_slice(target, img, shift, side_origin, dest_x, dest_w, out_x, o
     out_x, out_y, dest_w, h);
 }
 
-const four_star_checkbox = document.querySelector('#four_star');
-const question_checkbox = document.querySelector('#question');
-const epic_fail_checkbox = document.querySelector('#epic_fail');
+// Each panel owns the band between its edges. Where two neighbouring panels both
+// have a screenshot, the right one is cross-faded over the left across the seam
+// instead of butting up against it.
+function draw_backgrounds(layout, blend) {
+  const panels = layout.backgrounds;
+  const edges = panel_edges(panels.length);
 
-function draw_thumbnail() {
-  // console.log("draw_thumbnail");
+  const image_of = (panel) => backgrounds[panel.key];
 
-  ctx.fillStyle = "#888888";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Each panel's crop is nudged right by half the width its band gave up against the
+  // 640px reference, which keeps the subject centred however many panels there are.
+  const panel_shifts = panels.map((panel, i) => {
+    const band = edges[i + 1] - edges[i];
+    return (CROP_REF_BAND - band) / 2 - parseInt(shift_inputs[panel.key].value, 10);
+  });
 
-  const shift_left = -parseInt(background_left_shift.value, 10);
-  const shift_right = -parseInt(background_right_shift.value, 10);
-  const blend = parseInt(background_blend.value, 10);
+  const ready = panels.map((panel) => is_ready(image_of(panel)));
+  const faded = edges.map((_, i) => i > 0 && i < panels.length && blend > 0 && ready[i - 1] && ready[i]);
 
-  if (is_ready(background_left) && is_ready(background_right) && blend > 0) {
-    draw_bg_slice(ctx, background_left, shift_left, 0, 0, mid + blend, 0, 0);
+  // Solid bands first: a panel bordering a faded seam starts after that seam's
+  // ramp, and extends under the next one so the ramp has something to fade from.
+  for (let i = 0; i < panels.length; i++) {
+    if (!ready[i]) continue;
+
+    const start = faded[i] ? edges[i] + blend : edges[i];
+    const end = faded[i + 1] ? edges[i + 1] + blend : edges[i + 1];
+
+    draw_bg_slice(ctx, image_of(panels[i]), panel_shifts[i], edges[i], start, end - start, start, 0);
+  }
+
+  for (let i = 1; i < panels.length; i++) {
+    if (!faded[i]) continue;
+
+    const seam = edges[i];
 
     const off = document.createElement('canvas');
     off.width = blend * 2;
     off.height = h;
     const octx = off.getContext('2d');
 
-    draw_bg_slice(octx, background_right, shift_right, mid, mid - blend, blend * 2, 0, 0);
+    draw_bg_slice(octx, image_of(panels[i]), panel_shifts[i], seam, seam - blend, blend * 2, 0, 0);
 
     const grad = octx.createLinearGradient(0, 0, blend * 2, 0);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -207,20 +387,27 @@ function draw_thumbnail() {
     octx.fillStyle = grad;
     octx.fillRect(0, 0, blend * 2, h);
 
-    ctx.drawImage(off, mid - blend, 0);
-
-    draw_bg_slice(ctx, background_right, shift_right, mid, mid + blend, mid - blend, mid + blend, 0);
-  } else {
-    if (is_ready(background_left)) {
-      draw_bg_slice(ctx, background_left, shift_left, 0, 0, mid, 0, 0);
-    }
-
-    if (is_ready(background_right)) {
-      draw_bg_slice(ctx, background_right, shift_right, mid, mid, mid, mid, 0);
-    }
+    ctx.drawImage(off, seam - blend, 0);
   }
+}
 
-  ctx.drawImage(assets.abyss_12, 0, 0);
+const four_star_checkbox = document.querySelector('#four_star');
+const question_checkbox = document.querySelector('#question');
+const epic_fail_checkbox = document.querySelector('#epic_fail');
+
+function draw_thumbnail() {
+  // console.log("draw_thumbnail");
+
+  const layout = MODES[mode];
+
+  ctx.fillStyle = "#888888";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  draw_backgrounds(layout, parseInt(background_blend.value, 10));
+
+  if (layout.overlay) {
+    ctx.drawImage(assets[layout.overlay], 0, 0);
+  }
 
   ctx.font = "bold 100px Arial";
 
@@ -235,48 +422,34 @@ function draw_thumbnail() {
   const second_line = abyss_label_second.value;
 
   const text_distance = parseInt(abyss_label_distance.value, 10);
+  const text_middle = 360 + (layout.label_shift ? parseInt(label_shift.value, 10) : 0);
 
-  ctx.strokeText(fist_line, 640, 360 - text_distance);
-  ctx.strokeText(second_line, 640, 360 + text_distance);
+  ctx.strokeText(fist_line, 640, text_middle - text_distance);
+  ctx.strokeText(second_line, 640, text_middle + text_distance);
 
   ctx.fillStyle = "#ffe74e";
 
-  ctx.fillText(fist_line, 640, 360 - text_distance);
-  ctx.fillText(second_line, 640, 360 + text_distance);
+  ctx.fillText(fist_line, 640, text_middle - text_distance);
+  ctx.fillText(second_line, 640, text_middle + text_distance);
 
-  if (characters.left1) {
-    ctx.drawImage(characters.left1, 0, 0, characters.left1.width, characters.left1.height, 0, 50, 200, 200);
-  }
-
-  if (characters.left2) {
-    ctx.drawImage(characters.left2, 0, 0, characters.left2.width, characters.left2.height, 0, 260, 200, 200);
-  }
-
-  if (characters.left3) {
-    ctx.drawImage(characters.left3, 0, 0, characters.left3.width, characters.left3.height, 0, 470, 200, 200);
+  for (const slot of mode_slots(mode)) {
+    const image = characters[slot.key];
+    if (image) {
+      ctx.drawImage(image, 0, 0, image.width, image.height, slot.x, slot.y, slot.size, slot.size);
+    }
   }
 
-  if (characters.right1) {
-    ctx.drawImage(characters.right1, 0, 0, characters.right1.width, characters.right1.height, 1080, 50, 200, 200);
-  }
-
-  if (characters.right2) {
-    ctx.drawImage(characters.right2, 0, 0, characters.right2.width, characters.right2.height, 1080, 260, 200, 200);
-  }
-
-  if (characters.right3) {
-    ctx.drawImage(characters.right3, 0, 0, characters.right3.width, characters.right3.height, 1080, 470, 200, 200);
-  }
-
-  // extra 
-  if (four_star_checkbox.checked) {
-    ctx.drawImage(assets.four_star, 0, 0);
-  }
-  if (question_checkbox.checked) {
-    ctx.drawImage(assets.question, 0, 0);
-  }
-  if (epic_fail_checkbox.checked) {
-    ctx.drawImage(assets.epic_fail, 0, 0);
+  // extra
+  if (layout.extras) {
+    if (four_star_checkbox.checked) {
+      ctx.drawImage(assets.four_star, 0, 0);
+    }
+    if (question_checkbox.checked) {
+      ctx.drawImage(assets.question, 0, 0);
+    }
+    if (epic_fail_checkbox.checked) {
+      ctx.drawImage(assets.epic_fail, 0, 0);
+    }
   }
 }
 
@@ -293,13 +466,8 @@ abyss_label_distance.addEventListener("input", (event) => {
   draw_thumbnail();
 });
 
-background_left_shift.addEventListener("input", (event) => {
-  background_left_shift_value.textContent = background_left_shift.value;
-  draw_thumbnail();
-});
-
-background_right_shift.addEventListener("input", (event) => {
-  background_right_shift_value.textContent = background_right_shift.value;
+label_shift.addEventListener("input", (event) => {
+  label_shift_value.textContent = label_shift.value;
   draw_thumbnail();
 });
 
@@ -319,17 +487,43 @@ epic_fail_checkbox.addEventListener("input", (event) => {
   draw_thumbnail();
 });
 
-draw_thumbnail();
-
 const character_inputs = {};
+const character_slots = document.getElementById("character_slots");
 
-character_inputs.left1 = document.getElementById('first_team1');
-character_inputs.left2 = document.getElementById('first_team2');
-character_inputs.left3 = document.getElementById('first_team3');
+function build_character_inputs(name) {
+  const row = document.createElement("div");
+  row.className = "row g-2";
+  row.dataset.mode = name;
 
-character_inputs.right1 = document.getElementById('second_team1');
-character_inputs.right2 = document.getElementById('second_team2');
-character_inputs.right3 = document.getElementById('second_team3');
+  for (const group of MODES[name].groups) {
+    const column = document.createElement("div");
+    column.className = "col";
+
+    const title = document.createElement("div");
+    title.className = "small text-muted mb-1";
+    title.textContent = group.title;
+    column.append(title);
+
+    for (const slot of group.slots) {
+      const input = document.createElement("input");
+      input.className = "form-control form-control-sm mb-1";
+      input.placeholder = slot.placeholder;
+      column.append(input);
+      character_inputs[slot.key] = input;
+    }
+
+    row.append(column);
+  }
+
+  character_slots.append(row);
+}
+
+// Every mode's controls are built up front so each Awesomplete instance is
+// constructed exactly once; switching modes only flips visibility.
+for (const name in MODES) {
+  build_background_inputs(name);
+  build_character_inputs(name);
+}
 
 for (const key in character_inputs) {
   new Awesomplete(character_inputs[key], {
@@ -356,15 +550,53 @@ function setup_input(name) {
   character_inputs[name].addEventListener("input", (event) => {
     handle_char(name);
   });
-  
+
   character_inputs[name].addEventListener('awesomplete-selectcomplete', event => {
     handle_char(name);
   });
 }
 
-setup_input("left1");
-setup_input("left2");
-setup_input("left3");
-setup_input("right1");
-setup_input("right2");
-setup_input("right3");
+for (const key in character_inputs) {
+  setup_input(key);
+}
+
+function set_mode(next) {
+  const current = label_state[mode];
+  current.first = abyss_label_first.value;
+  current.second = abyss_label_second.value;
+  current.distance = abyss_label_distance.value;
+  current.shift = label_shift.value;
+
+  mode = next;
+
+  const restored = label_state[mode];
+  abyss_label_first.value = restored.first;
+  abyss_label_second.value = restored.second;
+  abyss_label_distance.value = restored.distance;
+  abyss_label_distance_value.textContent = restored.distance;
+  label_shift.value = restored.shift;
+  label_shift_value.textContent = restored.shift;
+
+  // Narrower panels cannot take as wide a cross-fade.
+  background_blend.max = MODES[mode].blend_max;
+  if (parseInt(background_blend.value, 10) > MODES[mode].blend_max) {
+    background_blend.value = MODES[mode].blend_max;
+  }
+  background_blend_value.textContent = background_blend.value;
+
+  // Awesomplete wraps each input in its own div, so panels are hidden by their
+  // data-mode marker rather than per input.
+  for (const element of document.querySelectorAll("[data-mode]")) {
+    element.classList.toggle("d-none", element.dataset.mode !== mode);
+  }
+
+  draw_thumbnail();
+}
+
+for (const radio of document.querySelectorAll('input[name="mode"]')) {
+  radio.addEventListener("change", (event) => {
+    if (event.target.checked) set_mode(event.target.value);
+  });
+}
+
+set_mode(mode);

@@ -177,7 +177,7 @@ function build_background_inputs(name) {
     title.textContent = panel.title;
 
     const hint = document.createElement("div");
-    hint.className = "text-muted";
+    hint.className = "text-body-secondary";
     hint.textContent = "Ctrl+V";
 
     // A native file input is far too wide for a third of this column, so the
@@ -223,7 +223,7 @@ function build_background_inputs(name) {
     label.textContent = `${panel.title} shift`;
 
     const value = document.createElement("output");
-    value.className = "small text-muted";
+    value.className = "small text-body-secondary";
     value.setAttribute("for", range.id);
     value.textContent = range.value;
 
@@ -500,7 +500,7 @@ function build_character_inputs(name) {
     column.className = "col";
 
     const title = document.createElement("div");
-    title.className = "small text-muted mb-1";
+    title.className = "small text-body-secondary mb-1";
     title.textContent = group.title;
     column.append(title);
 

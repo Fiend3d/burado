@@ -6,6 +6,12 @@ I built this to create thumbnails for my [YouTube channel](https://www.youtube.c
 
 [![Burado Thumbnail Maker](https://img.youtube.com/vi/waembn8Wqt4/0.jpg)](https://www.youtube.com/watch?v=waembn8Wqt4)
 
+## Appearance
+
+Use **Light** or **Dark** in the header to switch themes. The initial theme follows your system preference; choosing a theme saves it in this browser for future visits. The theme changes the editor only, so thumbnail image colors stay the same.
+
+Bootstrap 5.3.8 CSS and JavaScript are bundled locally in `static/`; no build step or CDN connection is needed to run the editor.
+
 ## How to add a character
 
 Place the PNG file in the `static/chars` directory and push. The [workflow](.github/workflows/pages.yml) regenerates `static/chars.json` from whatever is in that directory and redeploys the site, so the character appears in the autocomplete on its own — there is nothing to run by hand.

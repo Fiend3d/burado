@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Burado Thumbnail</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script src="static/js/theme.js"></script>
   <link href="static/css/bootstrap.min.css" rel="stylesheet">
   <link href="static/css/awesomplete.css" rel="stylesheet">
   <link href="static/css/style.css" rel="stylesheet">
@@ -14,17 +15,25 @@
 <body>
   <div class="container-xxl py-2">
 
-    <header class="d-flex align-items-center gap-2 mb-2">
+    <header class="d-flex flex-wrap align-items-center gap-2 mb-2">
       <h1 class="h5 mb-0 fw-bold">Burado Thumbnail Maker</h1>
       <a href="https://github.com/Fiend3d/burado" class="link-secondary d-inline-flex" title="Fiend3d/burado">
-        <img src="static/github.png" width="20" height="20" alt="GitHub">
+        <img src="static/github.png" class="github-icon" width="20" height="20" alt="GitHub">
       </a>
-      <span class="small text-muted d-none d-md-inline">Paste screenshots &rarr; adjust &rarr; profit</span>
-      <div class="btn-group btn-group-sm ms-auto" role="group" aria-label="Mode">
-        <input type="radio" class="btn-check" name="mode" id="mode_abyss" value="abyss" autocomplete="off" checked>
-        <label class="btn btn-outline-primary" for="mode_abyss">Abyss</label>
-        <input type="radio" class="btn-check" name="mode" id="mode_stygian" value="stygian" autocomplete="off">
-        <label class="btn btn-outline-primary" for="mode_stygian">Stygian</label>
+      <span class="small text-body-secondary d-none d-md-inline">Paste screenshots &rarr; adjust &rarr; profit</span>
+      <div class="d-flex flex-wrap gap-2 ms-auto">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Mode">
+          <input type="radio" class="btn-check" name="mode" id="mode_abyss" value="abyss" autocomplete="off" checked>
+          <label class="btn btn-outline-primary" for="mode_abyss">Abyss</label>
+          <input type="radio" class="btn-check" name="mode" id="mode_stygian" value="stygian" autocomplete="off">
+          <label class="btn btn-outline-primary" for="mode_stygian">Stygian</label>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Theme">
+          <input type="radio" class="btn-check" name="theme" id="theme_light" value="light" autocomplete="off" checked>
+          <label class="btn btn-outline-secondary" for="theme_light">Light</label>
+          <input type="radio" class="btn-check" name="theme" id="theme_dark" value="dark" autocomplete="off">
+          <label class="btn btn-outline-secondary" for="theme_dark">Dark</label>
+        </div>
       </div>
     </header>
 
@@ -52,14 +61,14 @@
               <div class="col-12">
                 <div class="d-flex justify-content-between">
                   <label for="abyss_label_distance" class="form-label small mb-1">Distance</label>
-                  <output for="abyss_label_distance" id="abyss_label_distance_value" class="small text-muted"></output>
+                  <output for="abyss_label_distance" id="abyss_label_distance_value" class="small text-body-secondary"></output>
                 </div>
                 <input type="range" class="form-range" id="abyss_label_distance" min="0" max="100" step="1" value="60">
               </div>
               <div class="col-12" data-mode="stygian">
                 <div class="d-flex justify-content-between">
                   <label for="label_shift" class="form-label small mb-1">Shift</label>
-                  <output for="label_shift" id="label_shift_value" class="small text-muted"></output>
+                  <output for="label_shift" id="label_shift_value" class="small text-body-secondary"></output>
                 </div>
                 <input type="range" class="form-range" id="label_shift" min="-250" max="250" step="1" value="0">
               </div>
@@ -74,7 +83,7 @@
             <div id="background_shifts" class="mt-2"></div>
             <div class="d-flex justify-content-between">
               <label for="background_blend" class="form-label small mb-1">Blend</label>
-              <output for="background_blend" id="background_blend_value" class="small text-muted"></output>
+              <output for="background_blend" id="background_blend_value" class="small text-body-secondary"></output>
             </div>
             <input type="range" class="form-range" id="background_blend" min="0" max="400" step="1" value="0">
           </div>

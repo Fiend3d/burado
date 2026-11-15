@@ -18,6 +18,18 @@ Place the PNG file in the `static/chars` directory and push. The [workflow](.git
 
 `make_chars.py` still does the same job locally. Run it from inside `static/` if you want `chars.json` up to date before pushing, e.g. to try the new character on a local `python -m http.server`.
 
+## Agent skill
+
+`.agents/skills/add-genshin-characters` is a [Pi skill](https://github.com/badlogic/pi-coding-agent) that finds which playable characters are missing, downloads their card icons from the wiki, and regenerates `chars.json`:
+
+```bash
+python .agents/skills/add-genshin-characters/scripts/missing_chars.py
+python .agents/skills/add-genshin-characters/scripts/fetch_icons.py --dry-run "Kujou Sara"
+python .agents/skills/add-genshin-characters/scripts/fetch_icons.py Varka Mitya Valeriy
+```
+
+In Pi it loads automatically when you ask to add missing characters, or force it with `/skill:add-genshin-characters`.
+
 ## Deployment
 
 The same workflow publishes the site, so **Settings → Pages → Source** has to stay on "GitHub Actions" rather than "Deploy from a branch".

@@ -91,7 +91,16 @@
 
         <div class="card mb-2">
           <div class="card-header py-1 px-2 small fw-semibold">Characters</div>
-          <div class="card-body p-2" id="character_slots"></div>
+          <div class="card-body p-2">
+            <div data-mode="stygian">
+              <div class="d-flex justify-content-between">
+                <label for="stygian_size" class="form-label small mb-1">Icon size</label>
+                <output for="stygian_size" id="stygian_size_value" class="small text-body-secondary"></output>
+              </div>
+              <input type="range" class="form-range" id="stygian_size" min="128" max="200" step="2" value="180">
+            </div>
+            <div id="character_slots"></div>
+          </div>
         </div>
 
         <div class="card mb-2" data-mode="abyss">

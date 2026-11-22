@@ -48,10 +48,18 @@ for (const item of assets.chars.chars) {
 const ABYSS_SIZE = 200;
 const ABYSS_YS = [50, 260, 470];
 
-const STYGIAN_SIZE = 128;
-const STYGIAN_Y = 576;
-const STYGIAN_MARGIN = 16;
-const STYGIAN_TEAM_GAP = 48;
+// Stygian icon size is a control rather than a constant.
+const STYGIAN_SIZE_DEFAULT = 180;
+const STYGIAN_BOTTOM_MARGIN = 16;
+
+// Nine icons have to share the 1280px width, so the gap is whatever is left over after
+// them, spread evenly across all eight. Past 142px that leftover goes negative and the
+// slots overlap, but the gap stays the same everywhere: the row reads as one evenly
+// spaced band instead of three teams colliding at the seams. Each card icon has a spare
+// card fanned behind it, so a shared overlap lands on that rather than on the faces.
+function stygian_gap(size) {
+  return (1280 - 9 * size) / 8;
+}
 
 function abyss_team(prefix, title, x) {
   return {
@@ -64,20 +72,28 @@ function abyss_team(prefix, title, x) {
   };
 }
 
-// 2 margins + 3 teams * 3 icons * 128 + 2 gaps * 48 == 1280 exactly.
-function stygian_team(team) {
-  const origin = STYGIAN_MARGIN + team * (3 * STYGIAN_SIZE + STYGIAN_TEAM_GAP);
+// The nine slots are one evenly spaced row; a team is just three consecutive slots of it.
+function stygian_team(team, size) {
+  const gap = stygian_gap(size);
   const title = `Team ${team + 1}`;
   return {
     title,
     slots: [0, 1, 2].map((i) => ({
       key: `sty${team + 1}_${i + 1}`,
       placeholder: `${title} ${i + 1}`,
-      x: origin + i * STYGIAN_SIZE,
-      y: STYGIAN_Y,
-      size: STYGIAN_SIZE,
+      // The gap is fractional at most sizes; rounding keeps the card edges on whole
+      // pixels instead of smearing them across a resample.
+      x: Math.round((team * 3 + i) * (size + gap)),
+      y: 720 - size - STYGIAN_BOTTOM_MARGIN,
+      size,
     })),
   };
+}
+
+// Rebuilding the groups keeps the slot keys, so the character inputs and whatever is
+// already in them survive a size change.
+function set_stygian_size(size) {
+  MODES.stygian.groups = [0, 1, 2].map((team) => stygian_team(team, size));
 }
 
 // A mode is just a layout table: which banner to blit, whether the extra overlays
@@ -115,7 +131,7 @@ const MODES = {
     // No banner here, so the caption is free to move between the top edge and the
     // row of characters.
     label_shift: true,
-    groups: [stygian_team(0), stygian_team(1), stygian_team(2)],
+    groups: [0, 1, 2].map((team) => stygian_team(team, STYGIAN_SIZE_DEFAULT)),
   },
 };
 
@@ -143,6 +159,10 @@ const label_state = {
 
 const background_panels = document.getElementById("background_panels");
 const background_shifts = document.getElementById("background_shifts");
+
+const stygian_size = document.getElementById("stygian_size");
+const stygian_size_value = document.getElementById("stygian_size_value");
+stygian_size_value.textContent = stygian_size.value;
 
 const background_blend = document.getElementById("background_blend");
 const background_blend_value = document.getElementById("background_blend_value");
@@ -473,6 +493,12 @@ label_shift.addEventListener("input", (event) => {
 
 background_blend.addEventListener("input", (event) => {
   background_blend_value.textContent = background_blend.value;
+  draw_thumbnail();
+});
+
+stygian_size.addEventListener("input", (event) => {
+  stygian_size_value.textContent = stygian_size.value;
+  set_stygian_size(parseInt(stygian_size.value, 10));
   draw_thumbnail();
 });
 
